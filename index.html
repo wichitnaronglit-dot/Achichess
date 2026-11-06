@@ -1,4 +1,8 @@
 <!doctype html><html lang="th"><head><meta charset="utf-8"><meta name="color-scheme" content="only dark"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><style>*{}body{margin:0}[hidden]{display:none!important}</style></head><body><title>Crownfall Chess</title>
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#05030a">
 <meta name="color-scheme" content="only dark">
 <meta name="darkreader-lock">
 <meta name="claude:viewport-fit-sides" content="cover">
@@ -87,6 +91,7 @@ button{font:inherit;color:inherit;cursor:pointer;background:none;border:0}
 #zoomReset{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:6;min-height:40px;padding:0 16px;border-radius:20px;background:rgba(13,16,40,.9);border:1px solid var(--gold);font-size:14px}
 @media (max-width:820px){#zoomReset{bottom:calc(112px + env(safe-area-inset-bottom,0px))}}
 .onrow{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:6px 9px;margin-bottom:6px;background:#0c0915;border:1px solid rgba(232,192,122,.28);border-radius:7px;font-size:14px}.onrow b{font-weight:500}.onrow .btn{min-height:36px;padding:2px 14px;flex:none}
+#fsHint{position:fixed;left:50%;bottom:calc(16px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:40;max-width:calc(100vw - 32px);padding:10px 16px;border-radius:10px;background:rgba(13,16,40,.95);border:1px solid var(--gold);font-size:14px;line-height:1.5;text-align:center}
 /* cinema */
 #cine{position:fixed;inset:0;z-index:20;pointer-events:none}
 .bar{position:absolute;left:0;right:0;height:11vh;background:#05030a;transition:transform .6s cubic-bezier(.2,.8,.2,1)}
@@ -217,12 +222,14 @@ input[type=text]{width:100%;box-sizing:border-box;height:42px;padding:0 12px;bor
 <div id="cmds">
   <button class="cmd" id="btnUndo" title="Undo" aria-label="Undo"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5 3 11l6 6v-4h6a4 4 0 0 1 0 8h-3v3h3a7 7 0 0 0 0-14H9z"/></svg>Undo</button>
   <button class="cmd" id="btnHint" title="Hint" aria-label="Hint"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a7 7 0 0 0-4 12.7V17a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-2.3A7 7 0 0 0 12 2zM9 20h6v1.2a.8.8 0 0 1-.8.8H9.800a.8.8 0 0 1-.8-.8z"/></svg>Hint</button>
+  <button class="cmd" id="btnFull" title="Full screen" aria-label="Full screen"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3h7v2.5H5.5V10H3zm11 0h7v7h-2.5V5.5H14zM3 14h2.5v4.5H10V21H3zm15.5 0H21v7h-7v-2.5h4.5z"/></svg>Full</button>
   <button class="cmd" id="btnSettings" title="Settings" aria-label="Settings"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m19.400 13 .1-1-.1-1 2-1.600-2-3.400-2.400 1a7.500 7.500 0 0 0-1.700-1L15 3.500h-4L10.700 6a7.500 7.500 0 0 0-1.700 1L6.600 6l-2 3.400 2 1.600-.1 1 .1 1-2 1.600 2 3.400 2.400-1a7.500 7.500 0 0 0 1.700 1l.3 2.500h4l.3-2.500a7.500 7.500 0 0 0 1.700-1l2.400 1 2-3.400zM13 15.500a3.500 3.500 0 1 1 0-7 3.500 3.500 0 0 1 0 7z" transform="translate(-1)"/></svg>Settings</button>
 </div>
 <button class="cmd" id="resign" title="Resign" aria-label="Resign"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 2h2v1h11l-3 5 3 5H7v9H5z"/></svg>Resign</button>
 <div id="card" data-on="0"><img id="cardImg" alt=""><div id="cardName"></div><div id="cardMove"></div></div>
 <button id="zoomReset" hidden aria-label="กลับขนาดกระดานเดิม">⤢ ขนาดเดิม</button>
 <div id="status" role="status"></div>
+<div id="fsHint" hidden role="status"></div>
 <div id="hist"><h3>Move History</h3><table><tbody id="histBody"></tbody></table></div>
 
 <div id="promo" hidden><div id="promoCards" role="group" aria-label="Choose a piece"></div></div>
@@ -251,7 +258,7 @@ input[type=text]{width:100%;box-sizing:border-box;height:42px;padding:0 12px;bor
     <div class="field" id="fColor"><span class="flabel">ฝั่งของคุณ</span><div class="seg" id="segColor"><button data-v="w">ขาว</button><button data-v="b">ดำ</button><button data-v="r">สุ่ม</button></div></div>
     <div class="field" id="fClockBox"><span class="flabel">เวลาต่อฝั่ง</span><div class="seg" id="segClock"><button data-v="3">3 นาที</button><button data-v="5">5 นาที</button><button data-v="10">10 นาที</button><button data-v="15">15 นาที</button></div></div>
     <p class="preview" id="preview"></p>
-    <div class="btnrow"><button class="btn pri" id="btnStart" style="flex:1">เริ่มแข่ง</button><button class="btn" id="btnLobbySet">ตั้งค่า</button></div>
+    <div class="btnrow"><button class="btn pri" id="btnStart" style="flex:1">เริ่มแข่ง</button><button class="btn" id="btnLobbyFull">เต็มจอ</button><button class="btn" id="btnLobbySet">ตั้งค่า</button></div>
   </section>
   <section class="panel">
     <h2>ตารางอันดับ ELO</h2>
@@ -1106,6 +1113,20 @@ $('btnLobby').onclick=()=>{Sfx.play('click');showLobby()};
 function showLobby(){Online.leaveGame();World.resetZoom();Sfx.stopFan();Cine2D.stop();World.paused=false;World.endMate();S.game=null;S.cfg=null;S.inPlay=false;$('over').hidden=true;World.setHighlights({});World.setViewer('w');World.setBoard(new E.Game().b);World.lobbyOrbit(true);$('lobby').hidden=false;['chipMe','chipOpp','cmds','resign','status','hist'].forEach(i=>$(i).hidden=true);$('vs').hidden=true;card(null);syncLobby()}
 /* ---------- settings ---------- */
 const togg=(id,key)=>{const el=$(id);const r=()=>el.setAttribute('aria-pressed',String(!!Store.settings[key]));r();el.onclick=()=>{Store.settings[key]=!Store.settings[key];persist();r();Sfx.play('click');if(key==='flip'&&S.game&&S.cfg.mode==='local')World.setViewer(Store.settings.flip?S.game.turn:S.cfg.myColor)}};
+/* full screen: real API where the browser allows it, otherwise explain Add to Home Screen */
+const Full=(()=>{const d=document,el=d.documentElement;
+  const on=()=>!!(d.fullscreenElement||d.webkitFullscreenElement)||matchMedia('(display-mode: fullscreen), (display-mode: standalone)').matches||navigator.standalone===true;
+  const can=()=>!!(el.requestFullscreen||el.webkitRequestFullscreen);
+  let hintT;const hint=t=>{$('fsHint').textContent=t;$('fsHint').hidden=false;clearTimeout(hintT);hintT=setTimeout(()=>$('fsHint').hidden=true,6000)};
+  const label=()=>{const f=on();$('btnFull').title=$('btnFull').ariaLabel=f?'ออกจากเต็มจอ':'เต็มจอ';$('btnLobbyFull').textContent=f?'ออกจากเต็มจอ':'เต็มจอ'};
+  async function toggle(){Sfx.play('click');
+    if(d.fullscreenElement||d.webkitFullscreenElement){try{await(d.exitFullscreen||d.webkitExitFullscreen).call(d)}catch(e){}return}
+    if(can()){try{await(el.requestFullscreen?el.requestFullscreen({navigationUI:'hide'}):el.webkitRequestFullscreen());try{await screen.orientation.lock('landscape')}catch(e){}return}catch(e){}}
+    const ios=/iPhone|iPad|iPod/.test(navigator.userAgent);
+    hint(ios?'iPhone เปิดเต็มจอจากปุ่มนี้ไม่ได้ ให้กดปุ่มแชร์ใน Safari แล้วเลือก "เพิ่มไปยังหน้าจอโฮม" จากนั้นเปิดเกมจากไอคอนนั้น':'เบราว์เซอร์นี้ไม่อนุญาตให้เต็มจอ ให้เปิดลิงก์ใน Chrome หรือใช้ "เพิ่มลงในหน้าจอหลัก" จากเมนูเบราว์เซอร์')}
+  d.addEventListener('fullscreenchange',label);d.addEventListener('webkitfullscreenchange',label);
+  $('btnFull').onclick=toggle;$('btnLobbyFull').onclick=toggle;label();
+  return{toggle}})();
 $('btnSettings').onclick=()=>{$('settings').hidden=false;$('btnSetClose').focus()};
 $('btnSetClose').onclick=()=>{$('settings').hidden=true};
 togg('tCine','cine');togg('tSound','sound');togg('tFlip','flip');togg('tFan','fan');
