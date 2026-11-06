@@ -1,11 +1,13 @@
-<!doctype html><html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><style>*{}body{margin:0}[hidden]{display:none!important}</style></head><body><title>Crownfall Chess</title>
+<!doctype html><html lang="th"><head><meta charset="utf-8"><meta name="color-scheme" content="only dark"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><style>*{}body{margin:0}[hidden]{display:none!important}</style></head><body><title>Crownfall Chess</title>
+<meta name="color-scheme" content="only dark">
+<meta name="darkreader-lock">
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Cormorant+Garamond:ital,wght@0,600;0,700;1,700&family=Noto+Serif+Thai:wght@400;500;700&display=swap">
 <style>
 /* Layout: the 3D stage fills the screen; a game HUD floats at its corners as in the reference art. */
 :root{
-  color-scheme:dark;
+  color-scheme:only dark;
   --ink:#0d0a16; --glass:rgba(16,12,26,.72); --glass-hi:rgba(34,26,52,.88);
   --gold:#e8c07a; --gold-hi:#ffe9b8; --gold-lo:#94682c; --ivory:#f5ecdc; --mute:#b9adc4;
   --blue:#6fb4ff; --red:#ff5a66; --good:#7fe0a4;
@@ -1159,7 +1161,7 @@ const Online=(()=>{
     if(!m)return;const op=S.cfg.myColor==='w'?'b':'w';S.clocks[op]=num(G.c,0,3600,S.clocks[op]);exec(m);
   }
   async function init(){
-    try{if(!window.claude||!window.claude.use)return renderList();room=await claude.use('room');if(!room)return renderList();
+    try{if(!window.claude||!window.claude.use){const b=document.querySelector('#segMode [data-v=online]');if(b)b.hidden=true;if(L.mode==='online'){L.mode='bot';persist();[...$('segMode').children].forEach(x=>x.setAttribute('aria-pressed',String(x.dataset.v==='bot')));syncLobby()}return renderList()}room=await claude.use('room');if(!room)return renderList();
       room.onPeers(()=>{onChange()},()=>{room=null;renderList()});ready=true;me();if(inGame())push();
       $('onList').addEventListener('click',e=>{const b=e.target.closest('button[data-p]');if(!b)return;const color=Math.random()<.5?'w':'b';offer={to:b.dataset.p,id:'g'+Date.now().toString(36)+Math.floor(Math.random()*1e6).toString(36),clock:L.clock,color};send({offer:{to:offer.to,id:offer.id,clock:offer.clock,color}});Sfx.play('click');renderList()});
       setInterval(sync,500);
